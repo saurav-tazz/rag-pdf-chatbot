@@ -13,17 +13,25 @@ def get_llm():
 def generate_answer(llm, question, documents):
     """Generate an answer using retrieved document context."""
 
+    if not documents:
+        return "I could not find the answer in the document."
+
     context = "\n\n".join(
         document.page_content
         for document in documents
     )
 
     prompt = f"""
-You are a helpful assistant answering questions based on a provided document.
+You are a document question-answering assistant.
 
-Use ONLY the information contained in the context below.
+Answer the question using ONLY the information contained
+in the provided context.
 
-If the answer cannot be found in the context, say:
+Do NOT use your own general knowledge.
+
+If the answer is not explicitly supported by the context,
+respond exactly with:
+
 "I could not find the answer in the document."
 
 Context:

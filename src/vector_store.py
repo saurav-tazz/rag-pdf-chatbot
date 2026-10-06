@@ -10,10 +10,26 @@ def create_vector_store(chunks, embedding_model):
     )
 
 
-def retrieve_documents(vector_store, query, k=3):
-    """Retrieve the most relevant documents for a query."""
+def retrieve_documents(
+    vector_store,
+    query,
+    k=3,
+    score_threshold=1.30
+):
+    """Retrieve relevant documents using a distance threshold."""
 
-    return vector_store.similarity_search(
-        query,
-        k=k
+    documents_with_scores = (
+        vector_store.similarity_search_with_score(
+            query,
+            k=k
+        )
     )
+
+    relevant_documents = []
+
+    for document, score in documents_with_scores:
+
+        if score <= score_threshold:
+            relevant_documents.append(document)
+
+    return relevant_documents
