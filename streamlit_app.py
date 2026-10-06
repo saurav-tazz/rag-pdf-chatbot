@@ -58,6 +58,9 @@ if "vector_store" not in st.session_state:
 if "uploaded_filename" not in st.session_state:
     st.session_state.uploaded_filename = None
 
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 
 # -----------------------------
 # File uploader
@@ -75,13 +78,13 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
 
-    # Check whether this is a new PDF
     if (
         st.session_state.uploaded_filename
         != uploaded_file.name
     ):
 
         st.session_state.vector_store = None
+        st.session_state.messages = []
 
         st.session_state.uploaded_filename = (
             uploaded_file.name
@@ -137,52 +140,117 @@ if uploaded_file is not None:
 
 
 # -----------------------------
+# Display previous messages
+# -----------------------------
+
+for message in st.session_state.messages:
+
+    with st.chat_message(message["role"]):
+        st.write(message["content"])
+
+
+# -----------------------------
 # Ask questions
 # -----------------------------
 
 if st.session_state.vector_store is not None:
 
-    question = st.text_input(
-        "Ask a question about the PDF:"
+    question = st.chat_input(
+        "Ask a question about the PDF..."
     )
 
     if question:
 
         # -----------------------------
+        # Display user question
+        # -----------------------------
+
+        with st.chat_message("user"):
+            st.write(question)
+
+        st.session_state.messages.append(
+            {
+                "role": "user",
+                "content": question
+            }
+        )
+
+        # -----------------------------
         # Retrieve relevant documents
         # -----------------------------
 
-        with st.spinner("Searching the document..."):
+        with st.chat_message("assistant"):
 
-            documents = retrieve_documents(
-                st.session_state.vector_store,
-                question,
-                k=3
-            )
+            with st.spinner("Searching the document..."):
+
+                documents = retrieve_documents(
+                    st.session_state.vector_store,
+                    question,
+                    k=3
+                )
+
+            # -----------------------------
+            # Load LLM
+            # -----------------------------
+
+            llm = load_llm()
+
+            # -----------------------------
+            # Generate answer
+            # -----------------------------
+
+            with st.spinner("Generating answer..."):
+
+                answer = generate_answer(
+                    llm,
+                    question,
+                    documents
+                )
+
+            st.write(answer)
+
+            # -----------------------------
+            # Display sources
+            # -----------------------------
+
+            unique_sources = []
+
+            for document in documents:
+
+                source = document.metadata.get(
+                    "source",
+                    "Unknown source"
+                )
+
+                page = document.metadata.get(
+                    "page"
+                )
+
+                if page is not None:
+                    source_info = (
+                        f"{os.path.basename(source)} "
+                        f"(Page {page + 1})"
+                    )
+                else:
+                    source_info = os.path.basename(source)
+
+                if source_info not in unique_sources:
+                    unique_sources.append(source_info)
+
+            if unique_sources:
+
+                st.markdown("**Sources:**")
+
+                for source in unique_sources:
+                    st.write(f"- {source}")
 
         # -----------------------------
-        # Load LLM
+        # Save assistant response
         # -----------------------------
 
-        llm = load_llm()
-
-        # -----------------------------
-        # Generate answer
-        # -----------------------------
-
-        with st.spinner("Generating answer..."):
-
-            answer = generate_answer(
-                llm,
-                question,
-                documents
-            )
-
-        # -----------------------------
-        # Display answer
-        # -----------------------------
-
-        st.subheader("Answer")
-
-        st.write(answer)
-        
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": answer
+            }
+        )
