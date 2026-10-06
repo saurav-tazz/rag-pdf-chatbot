@@ -1,8 +1,10 @@
 from langchain_community.document_loaders import PyPDFLoader
 
+
 pdf_path = "data/rag-test-doc.pdf"
 
 loader = PyPDFLoader(pdf_path)
+
 documents = loader.load()
 
 print(f"Number of pages: {len(documents)}")
