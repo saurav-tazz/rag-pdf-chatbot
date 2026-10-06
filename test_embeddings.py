@@ -35,3 +35,4 @@ print(f"Vector dimensions: {len(vectors[0])}")
 for i, vector in enumerate(vectors):
     print(f"\nVector {i + 1}:")
     print(vector[:10])
+    

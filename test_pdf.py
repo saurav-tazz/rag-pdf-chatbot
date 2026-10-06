@@ -27,3 +27,4 @@ for i, chunk in enumerate(chunks[:5]):
     print(f"\n--- Chunk {i + 1} ---")
     print(chunk.page_content)
     print(f"Metadata: {chunk.metadata}")
+    
