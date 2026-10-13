@@ -145,8 +145,17 @@ if uploaded_file is not None:
 
 for message in st.session_state.messages:
 
-    with st.chat_message(message["role"]):
-        st.write(message["content"])
+    if not isinstance(message, dict):
+        continue
+
+    role = message.get("role")
+    content = message.get("content")
+
+    if role not in ("user", "assistant") or not isinstance(content, str):
+        continue
+
+    with st.chat_message(role):
+        st.write(content)
 
 
 # -----------------------------
@@ -209,37 +218,37 @@ if st.session_state.vector_store is not None:
 
             st.write(answer)
 
-            # -----------------------------
-# Display retrieved evidence
-# -----------------------------
+        # -----------------------------
+        # Display retrieved evidence
+        # -----------------------------
 
-if documents:
+        if documents:
 
-    st.markdown("### Retrieved Evidence")
+            st.markdown("### Retrieved Evidence")
 
-    for index, document in enumerate(documents, start=1):
+            for index, document in enumerate(documents, start=1):
 
-        source = document.metadata.get(
-            "source",
-            "Unknown source"
-        )
+                source = document.metadata.get(
+                    "source",
+                    "Unknown source"
+                )
 
-        page = document.metadata.get("page")
+                page = document.metadata.get("page")
 
-        source_label = os.path.basename(source)
+                source_label = os.path.basename(source)
 
-        if page is not None:
-            source_label += f" — Page {page + 1}"
+                if page is not None:
+                    source_label += f" — Page {page + 1}"
 
-        with st.expander(
-            f"Evidence {index}: {source_label}"
-        ):
-            st.caption(
-                "This is the retrieved text supplied "
-                "to the answer-generation model."
-            )
+                with st.expander(
+                    f"Evidence {index}: {source_label}"
+                ):
+                    st.caption(
+                        "This is the retrieved text supplied "
+                        "to the answer-generation model."
+                    )
 
-            st.text(document.page_content)
+                    st.text(document.page_content)
 
         # -----------------------------
         # Save assistant response

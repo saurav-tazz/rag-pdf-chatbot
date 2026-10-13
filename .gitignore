@@ -25,3 +25,6 @@ data/*.pdf
 
 # Python cache
 .pytest_cache/
+
+# Streamlit local config (not committed; watcher settings are environment-specific)
+.streamlit/
