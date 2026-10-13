@@ -10,6 +10,7 @@ def get_llm():
     )
 
 
+
 def generate_answer(llm, question, documents):
     """Generate an answer using retrieved document context."""
 
@@ -22,27 +23,29 @@ def generate_answer(llm, question, documents):
     )
 
     prompt = f"""
-You are a document question-answering assistant.
+You are a helpful assistant that explains information
+from uploaded documents to students.
 
-Answer the question using ONLY the information contained
-in the provided context.
+RULES:
+1. Use ONLY the provided context to answer.
+2. Explain the relevant information in clear, simple language.
+3. When the context provides only a brief statement, explain
+   its meaning without adding unsupported facts.
+4. Do not merely copy a short phrase from the context.
+5. If the context does not contain enough information to
+   answer the question, say:
+   "I could not find enough information in the document."
+6. Keep the answer focused on the question.
 
-Do NOT use your own general knowledge.
-
-If the answer is not explicitly supported by the context,
-respond exactly with:
-
-"I could not find the answer in the document."
-
-Context:
+DOCUMENT CONTEXT:
 {context}
 
-Question:
+QUESTION:
 {question}
 
-Answer:
+Write a clear, useful answer:
 """
 
     response = llm.invoke(prompt)
 
-    return response.content
+    return response.content.strip()

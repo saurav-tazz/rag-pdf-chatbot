@@ -25,11 +25,28 @@ def retrieve_documents(
         )
     )
 
+    print(f"\n========== QUERY: {query} ==========")
+
     relevant_documents = []
 
     for document, score in documents_with_scores:
 
+        page = document.metadata.get(
+            "page",
+            0
+        ) + 1
+
+        print(f"\nScore: {score:.4f}")
+        print(f"Page: {page}")
+        print("Content:")
+        print(document.page_content[:800])
+
         if score <= score_threshold:
             relevant_documents.append(document)
+
+    print(
+        f"\nRelevant documents: "
+        f"{len(relevant_documents)}"
+    )
 
     return relevant_documents

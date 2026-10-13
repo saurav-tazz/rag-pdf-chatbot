@@ -213,36 +213,37 @@ if st.session_state.vector_store is not None:
             # Display sources
             # -----------------------------
 
-            unique_sources = []
-
-            for document in documents:
-
-                source = document.metadata.get(
-                    "source",
-                    "Unknown source"
-                )
-
-                page = document.metadata.get(
-                    "page"
-                )
-
-                if page is not None:
-                    source_info = (
-                        f"{os.path.basename(source)} "
-                        f"(Page {page + 1})"
-                    )
-                else:
-                    source_info = os.path.basename(source)
-
-                if source_info not in unique_sources:
-                    unique_sources.append(source_info)
-
-            if unique_sources:
+            if documents:
 
                 st.markdown("**Sources:**")
 
-                for source in unique_sources:
-                    st.write(f"- {source}")
+                for document in documents:
+
+                    source = document.metadata.get(
+                        "source",
+                        "Unknown source"
+                    )
+
+                    page = document.metadata.get(
+                        "page"
+                    )
+
+                    if page is not None:
+                        source_label = (
+                            f"{os.path.basename(source)} "
+                            f"(Page {page + 1})"
+                        )
+                    else:
+                        source_label = os.path.basename(
+                            source
+                        )
+
+                    snippet = " ".join(
+                        document.page_content.split()
+                    )
+
+                    with st.expander(source_label):
+                        st.write(snippet)
 
         # -----------------------------
         # Save assistant response
