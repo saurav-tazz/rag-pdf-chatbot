@@ -210,40 +210,36 @@ if st.session_state.vector_store is not None:
             st.write(answer)
 
             # -----------------------------
-            # Display sources
-            # -----------------------------
+# Display retrieved evidence
+# -----------------------------
 
-            if documents:
+if documents:
 
-                st.markdown("**Sources:**")
+    st.markdown("### Retrieved Evidence")
 
-                for document in documents:
+    for index, document in enumerate(documents, start=1):
 
-                    source = document.metadata.get(
-                        "source",
-                        "Unknown source"
-                    )
+        source = document.metadata.get(
+            "source",
+            "Unknown source"
+        )
 
-                    page = document.metadata.get(
-                        "page"
-                    )
+        page = document.metadata.get("page")
 
-                    if page is not None:
-                        source_label = (
-                            f"{os.path.basename(source)} "
-                            f"(Page {page + 1})"
-                        )
-                    else:
-                        source_label = os.path.basename(
-                            source
-                        )
+        source_label = os.path.basename(source)
 
-                    snippet = " ".join(
-                        document.page_content.split()
-                    )
+        if page is not None:
+            source_label += f" — Page {page + 1}"
 
-                    with st.expander(source_label):
-                        st.write(snippet)
+        with st.expander(
+            f"Evidence {index}: {source_label}"
+        ):
+            st.caption(
+                "This is the retrieved text supplied "
+                "to the answer-generation model."
+            )
+
+            st.text(document.page_content)
 
         # -----------------------------
         # Save assistant response
